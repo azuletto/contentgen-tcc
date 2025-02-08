@@ -1,0 +1,191 @@
+/* Resetando alguns estilos básicos */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #111827;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  text-align: center;
+  width: 100%;
+  max-width: 600px;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #fff;
+}
+
+.subtitle {
+  color: #9ca3af;
+  margin-bottom: 2rem;
+}
+
+.form-container {
+  background-color: #1f2937;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.label {
+  text-align: left;
+  display: block;
+  margin: 1rem 0 0.5rem;
+}
+
+.input, .select {
+  width: 100%;
+  padding: 1rem;
+  background-color: #374151;
+  border: 1px solid #4b5563;
+  color: white;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.input::placeholder {
+  color: #6b7280;
+}
+
+.button {
+  width: 100%;
+  padding: 1rem;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.button:hover {
+  background-color: #2563eb;
+}
+
+.footer {
+  margin-top: 3rem;
+  font-size: 0.9rem;
+  color: #9ca3af;
+}
+
+footer p strong {
+  font-weight: bold;
+}
+.email-link, .github-link {
+  color: #4CAF50;  /* Verde suave para o link */
+  text-decoration: none;  /* Remove o sublinhado */
+}
+
+.email-link:hover, .github-link:hover {
+  color: #45a049;  /* Cor mais escura quando o mouse passar */
+  text-decoration: underline;  /* Adiciona o sublinhado no hover */
+}
+/* Estilo básico para a notificação */
+.notification {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #4CAF50; /* Verde para sucesso */
+  color: white;
+  padding: 15px;
+  border-radius: 5px;
+  font-size: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 9999;
+  opacity: 0;
+  animation: fadeIn 0.5s forwards;
+}
+
+/* Animação de aparecimento */
+@keyframes fadeIn {
+  from {
+      opacity: 0;
+      top: 10px;
+  }
+  to {
+      opacity: 1;
+      top: 20px;
+  }
+}
+
+/* Estilo da notificação de sucesso */
+.notification.success {
+  background-color: #4CAF50; /* Verde */
+}
+/* Estilos gerais do modal */
+#json-modal {
+  display: none; /* Inicialmente o modal está escondido */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Fundo escurecido */
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  font-family: Arial, sans-serif;
+}
+
+/* Caixa de conteúdo do modal */
+#json-modal-content {
+  background-color: #fff; /* Fundo branco */
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 800px;
+  margin: auto;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Título do modal */
+#json-modal-content h2 {
+  margin-top: 0;
+  color: #333;
+  font-size: 1.5rem;
+}
+
+/* Estilo do conteúdo JSON */
+#json-content {
+  background-color: #f4f4f4; /* Fundo claro */
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  color: #333;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: monospace;
+}
+
+/* Botão de fechar */
+#close-modal {
+  background-color: #007bff; /* Cor do botão de fechar */
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-top: 20px;
+}
+
+/* Hover do botão de fechar */
+#close-modal:hover {
+  background-color: #0056b3;
+}
+
+
+

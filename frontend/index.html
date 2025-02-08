@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CGEN</title>
+    <link rel="stylesheet" href="src/index.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Estilo do modal de notificação */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            opacity: 1;
+            transition: opacity 0.5s ease-out;
+            z-index: 1000;
+            display: none; /* Inicialmente oculta */
+        }
+        .notification.hide {
+            opacity: 0;
+        }
+
+        /* Estilos adicionais para diferenciar as mensagens */
+        .notification.in-progress {
+            background-color: #FFA500; /* Laranja para "em progresso" */
+        }
+
+        .notification.success {
+            background-color: #4CAF50; /* Verde para sucesso */
+        }
+
+        .notification.error {
+            background-color: #F44336; /* Vermelho para erro */
+        }
+
+        /* Layout dos botões lado a lado */
+        .buttons-container {
+            display: flex;
+            gap: 15px; /* Espaço entre os botões */
+            margin-top: 20px;
+        }
+
+        /* Estilos para os botões */
+        .button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        /* Estilo do botão de gerar conteúdo (roxo com gradiente) */
+        #submit-btn {
+            background: linear-gradient(45deg, #6a1b9a, #ab47bc);
+            color: white;
+        }
+
+        /* Estilo do botão de gerar PDF */
+        #generate-pdf-btn {
+            background-color: #4CAF50; /* Verde padrão */
+            color: white;
+        }
+
+        /* Estilo do botão de visualizar JSON */
+        #json-btn {
+            background-color: #2196F3; /* Azul */
+            color: white;
+            font-size: 12px;
+            padding: 10px;  /* Ajuste para manter quadrado */
+            width: 30px;  /* Largura fixada */
+            height: 30px;  /* Altura fixada */
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-left: 10px; /* Espaço entre o botão e a barra de seleção */
+            margin-top: 5px; /* Alinha verticalmente o botão com a seleção */
+            margin-bottom: 5%;
+        }
+
+        /* Estilo do botão desabilitado */
+        .disabled {
+            background-color: #b0bec5; /* Cor cinza enquanto desabilitado */
+            cursor: not-allowed;
+        }
+
+        /* Estilo do modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 80%;
+            max-height: 80%;
+            overflow: auto;
+            z-index: 1001;
+        }
+
+        .modal-content {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .modal-close {
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        
+        <div class="form-container">
+            <form id="form" class="form">
+                <label for="url" class="label">🔗 Conteúdo</label>
+                <input type="url" id="url" class="input" placeholder="Cole o link aqui..." required>
+                <label for="output-type" class="label">Tipo de conteúdo:</label>
+                <div style="display: flex; align-items: center;">
+                    <select id="output-type" class="select" style="flex-grow: 1;">
+                        <option value="Patentes">📜 Patentes</option>
+                        <option value="Softwares">💻 Softwares</option>
+                        <option value="Serviços">🛠️ Serviços</option>
+                        <option value="Pesquisas">🔬 Pesquisas</option>
+                        <option value="Laboratórios">🏢 Laboratórios</option>
+                    </select>
+                    <!-- Botão quadrado para visualizar JSON -->
+                    <button type="button" id="json-btn" class="button disabled" disabled>📝</button>
+                </div>
+                <label for="api-key" class="label">🔑 API Key:</label>
+                <div class="input-container">
+                    <input type="password" id="api-key" class="input" placeholder="Insira sua API Key...">
+                </div>
+                <button type="button" id="save-api-key-btn" class="button">💾 Salvar API Key</button>
+
+                <label for="url" class="label">🔗 Conteúdo</label>
+                <div class="buttons-container">
+                    <!-- Botão de gerar conteúdo -->
+                    <button type="submit" id="submit-btn" class="button disabled" disabled>⚡ Gerar Conteúdo</button>
+
+                    <!-- Botão de gerar PDF -->
+                    <button type="button" id="generate-pdf-btn" class="button">📄 Gerar PDF</button>
+
+
+
+                </div>
+            </form>
+        </div>
+
+        <footer class="footer">
+            <p>Desenvolvido por <strong>André Oliveira</strong> | Universidade Estadual do Norte do Paraná - UENP</p>
+            <p>📧 Email: <a href="mailto:oliveira.andre.dev@gmail.com" class="email-link">oliveira.andre.dev@gmail.com</a></p>
+            <p>GitHub: <a href="https://github.com/azuletto" target="_blank" class="github-link">Azuletto</a></p>
+        </footer>
+    </div>
+
+    <!-- Notificação de Sucesso -->
+    <div id="notification" class="notification hide">
+        Processamento em andamento...
+    </div>
+
+    <!-- Modal para visualizar JSON -->
+ <!-- Modal -->
+<div id="json-modal">
+  <div id="json-modal-content">
+      <h2>Conteúdo JSON</h2>
+      <pre id="json-content"></pre> <!-- Aqui o conteúdo JSON será exibido -->
+      <button id="close-modal">Fechar</button>
+  </div>
+</div>
+
+
+    <script>
+        const urlInput = document.getElementById('url');
+        const submitButton = document.getElementById('submit-btn');
+        const generatePdfButton = document.getElementById('generate-pdf-btn');
+        const jsonButton = document.getElementById('json-btn');
+        const notification = document.getElementById('notification');
+        const htmlFilePath = 'backend/src/extraction/output/rendered_page.html';
+        const jsonFilePath = 'backend/src/generator/output_json/summary.json';
+
+        // Função para verificar se o arquivo HTML existe
+        async function checkHtmlFileExistence() {
+            try {
+                const response = await fetch(htmlFilePath);
+                if (response.ok) {
+                    generatePdfButton.disabled = false; // Habilita o botão se o arquivo existir
+                    generatePdfButton.classList.remove('disabled');
+                } else {
+                    generatePdfButton.disabled = true; // Desabilita o botão se o arquivo não existir
+                    generatePdfButton.classList.add('disabled');
+                }
+            } catch (error) {
+                console.log('Erro ao verificar arquivo HTML:', error);
+                generatePdfButton.disabled = true; // Desabilita o botão em caso de erro
+                generatePdfButton.classList.add('disabled');
+            }
+        }
+
+        // Função para verificar se o arquivo JSON foi gerado
+        async function checkJsonFileExistence() {
+            try {
+                const response = await fetch(jsonFilePath);
+                if (response.ok) {
+                    jsonButton.disabled = false; // Habilita o botão se o JSON existir
+                    jsonButton.classList.remove('disabled');
+                } else {
+                    jsonButton.disabled = true; // Desabilita o botão se o JSON não existir
+                    jsonButton.classList.add('disabled');
+                }
+            } catch (error) {
+                console.log('Erro ao verificar arquivo JSON:', error);
+                jsonButton.disabled = true; // Desabilita o botão em caso de erro
+                jsonButton.classList.add('disabled');
+            }
+        }
+
+        // Chama as verificações iniciais ao carregar a página
+        window.onload = function() {
+            checkHtmlFileExistence();
+            checkJsonFileExistence();
+        };
+
+        // Habilitar/desabilitar o botão de submit com base no input do URL
+        urlInput.addEventListener('input', function() {
+            if (urlInput.value.trim() !== '') {
+                submitButton.disabled = false;
+                submitButton.classList.remove('disabled');
+            } else {
+                submitButton.disabled = true;
+                submitButton.classList.add('disabled');
+            }
+        });
+
+        document.getElementById('form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const url = document.getElementById('url').value;
+            const outputType = document.getElementById('output-type').value;
+
+            // Exibir notificação de "Em progresso" antes de enviar a requisição
+            showNotification('in-progress', 'Processando...');
+
+            try {
+                const response = await axios.post('http://127.0.0.1:5000/process', {
+                    url,
+                    output_type: outputType
+                });
+
+                // Exibir a notificação de sucesso após o processamento
+                setTimeout(() => {
+                    showNotification('success', 'Processamento concluído com sucesso!');
+                }, 2000); // Esperar 2 segundos para mostrar a conclusão
+
+                // Verificar se o JSON foi gerado
+                checkJsonFileExistence();
+
+            } catch (error) {
+                // Exibir a notificação de erro caso algo falhe
+                setTimeout(() => {
+                    showNotification('error', 'Erro ao processar!');
+                }, 2000); // Esperar 2 segundos para mostrar o erro
+            }
+        });
+
+        // Função para mostrar a notificação
+        function showNotification(type, message) {
+            notification.textContent = message;
+
+            // Remover as classes de estilo antigas
+            notification.classList.remove('hide', 'in-progress', 'success', 'error');
+
+            // Adicionar a classe correta para o tipo da notificação
+            notification.classList.add(type);
+
+            // Exibe a notificação
+            notification.style.display = 'block'; // Exibe a notificação
+
+            // Remover a notificação após 4 segundos
+            setTimeout(() => {
+                notification.style.display = 'none'; // Oculta a notificação
+            }, 4000);  // Tempo de visibilidade da notificação
+        }
+
+        // Função para exibir o modal com o conteúdo JSON
+        // Função para exibir o modal com o conteúdo JSON
+// Função para exibir o modal com o conteúdo JSON
+jsonButton.addEventListener('click', async function() {
+    if (jsonButton.disabled) return; // Se o botão estiver desabilitado, não faz nada
+
+    try {
+        const response = await fetch('http://127.0.0.1:5000/get-json');
+        if (response.ok) {
+            const jsonContent = await response.json();
+            document.getElementById('json-content').textContent = JSON.stringify(jsonContent, null, 4);
+            document.getElementById('json-modal').style.display = 'flex';
+        }
+    } catch (error) {
+        console.log('Erro ao carregar JSON:', error);
+    }
+});
+
+// Função para fechar o modal
+document.getElementById('close-modal').addEventListener('click', function() {
+    document.getElementById('json-modal').style.display = 'none';
+});
+
+generatePdfButton.addEventListener('click', () => {
+        window.location.href = 'src/pages/generatepdf.html';  // Redirecionamento para a página desejada
+    });
+
+    </script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const apiKeyInput = document.getElementById('api-key');
+        const saveApiKeyButton = document.getElementById('save-api-key-btn');
+
+        saveApiKeyButton.addEventListener('click', async function () {
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey) {
+                alert("Por favor, insira uma API Key!");
+                return;
+            }
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/set-api-key', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ api_key: apiKey })
+                });
+
+                if (response.ok) {
+                    alert("API Key salva com sucesso!");
+                    apiKeyInput.value = ''; 
+                } else {
+                    alert("Erro ao salvar a API Key!");
+                }
+            } catch (error) {
+                console.error("Erro ao enviar a API Key:", error);
+                alert("Erro na comunicação com o servidor!");
+            }
+        });
+
+        async function loadApiKey() {
+            try {
+                const response = await fetch('http://127.0.0.1:5000/get-api-key');
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log("API Key carregada:", data.api_key);
+                } else {
+                    console.error("Erro ao carregar a API Key");
+                }
+            } catch (error) {
+                console.error("Erro na requisição da API Key:", error);
+            }
+        }
+
+        loadApiKey();
+    });
+</script>
+</body>
+</html>
